@@ -104,7 +104,7 @@ def export_deploy_cfg(env: ManagerBasedRLEnv, log_dir):
         if hasattr(term_cfg, "clip") and term_cfg.clip is not None:
             term_cfg.clip = action_term._clip[0].detach().cpu().numpy().tolist()
 
-        if action_name in ["JointPositionAction", "JointVelocityAction"] and hasattr(term_cfg, "use_default_offset"):
+        if action_name in ["JointPositionAction", "JointVelocityAction", "joint_pos"] and hasattr(term_cfg, "use_default_offset"):
             if term_cfg.use_default_offset:
                 term_cfg.offset = action_term._offset[0].detach().cpu().numpy().tolist()
             else:
