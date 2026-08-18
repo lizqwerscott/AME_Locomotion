@@ -79,10 +79,11 @@ from isaaclab.envs import (
 )
 from isaaclab.utils.assets import retrieve_file_path
 from isaaclab.utils.dict import print_dict
-from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkpoint
+# from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkpoint
 
 from isaaclab_rl.rsl_rl import RslRlBaseRunnerCfg, RslRlVecEnvWrapper
 from exporter import export_policy_as_jit, export_policy_as_onnx
+from export_deploy_cfg import export_deploy_cfg
 
 import isaaclab_tasks  # noqa: F401
 from isaaclab_tasks.utils import get_checkpoint_path
@@ -112,7 +113,11 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")
     if args_cli.use_pretrained_checkpoint:
-        resume_path = get_published_pretrained_checkpoint("rsl_rl", train_task_name)
+        # for isaaclab v2.3.2
+        # resume_path = get_published_pretrained_checkpoint("rsl_rl", train_task_name)
+        resume_path = get_checkpoint_path(
+            os.path.dirname(agent_cfg.load_run), os.path.basename(agent_cfg.load_run), agent_cfg.load_checkpoint
+        )
         if not resume_path:
             print("[INFO] Unfortunately a pre-trained checkpoint is currently unavailable for this task.")
             return
@@ -178,7 +183,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # export policy to onnx/jit
     export_model_dir = os.path.join(os.path.dirname(resume_path), "exported")
     # export_policy_as_jit(policy_nn, normalizer=normalizer, path=export_model_dir, filename="policy.pt")
-    # export_policy_as_onnx(policy_nn, normalizer=normalizer, path=export_model_dir, filename="policy.onnx")
+    export_policy_as_onnx(policy_nn, normalizer=normalizer, path=export_model_dir, filename="policy.onnx")
 
     dt = env.unwrapped.step_dt
 
@@ -242,7 +247,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
         """Visualize attention weights using color and marker size."""
         if attn is None or attn.numel() == 0:
             return
-        
+
         try:
             height_scanner = env.unwrapped.scene["height_scanner"]
             if not hasattr(height_scanner.data, "ray_hits_w"):
@@ -343,7 +348,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:
                     break
-            
+
             # time delay for real-time playback
             sleep_time = dt - (time.time() - start_time)
             if args_cli.real_time and sleep_time > 0:
@@ -362,7 +367,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 # Exit the play loop after recording one video
                 if timestep == args_cli.video_length:
                     break
-            
+
             # time delay for real-time playback
             sleep_time = dt - (time.time() - start_time)
             if args_cli.real_time and sleep_time > 0:
