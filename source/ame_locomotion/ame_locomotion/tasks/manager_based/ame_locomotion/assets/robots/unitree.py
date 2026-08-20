@@ -384,6 +384,25 @@ UNITREE_G1_23DOF_CFG = UnitreeArticulationCfg(
     ],
 )
 
+# Following the principles of BeyondMimic, and the kp/kd computation logic.
+ARMATURE_5020 = 0.003609725
+ARMATURE_7520_14 = 0.010177520
+ARMATURE_7520_22 = 0.025101925
+ARMATURE_4010 = 0.00425
+
+NATURAL_FREQ = 10 * 2.0 * 3.1415926535  # 10Hz
+DAMPING_RATIO = 2.0
+
+STIFFNESS_5020 = ARMATURE_5020 * NATURAL_FREQ**2
+STIFFNESS_7520_14 = ARMATURE_7520_14 * NATURAL_FREQ**2
+STIFFNESS_7520_22 = ARMATURE_7520_22 * NATURAL_FREQ**2
+STIFFNESS_4010 = ARMATURE_4010 * NATURAL_FREQ**2
+
+DAMPING_5020 = 2.0 * DAMPING_RATIO * ARMATURE_5020 * NATURAL_FREQ
+DAMPING_7520_14 = 2.0 * DAMPING_RATIO * ARMATURE_7520_14 * NATURAL_FREQ
+DAMPING_7520_22 = 2.0 * DAMPING_RATIO * ARMATURE_7520_22 * NATURAL_FREQ
+DAMPING_4010 = 2.0 * DAMPING_RATIO * ARMATURE_4010 * NATURAL_FREQ
+
 UNITREE_G1_29DOF_CFG = UnitreeArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
         usd_path=f"{UNITREE_MODEL_DIR}/G1/29dof/usd/g1_29dof_rev_1_0/g1_29dof_rev_1_0.usd",
@@ -423,12 +442,12 @@ UNITREE_G1_29DOF_CFG = UnitreeArticulationCfg(
             effort_limit_sim=88,
             velocity_limit_sim=32.0,
             stiffness={
-                ".*_hip_.*": 100.0,
-                "waist_yaw_joint": 200.0,
+                ".*_hip_.*": STIFFNESS_7520_14,
+                "waist_yaw_joint": STIFFNESS_7520_14,
             },
             damping={
-                ".*_hip_.*": 2.0,
-                "waist_yaw_joint": 5.0,
+                ".*_hip_.*": DAMPING_7520_14,
+                "waist_yaw_joint": DAMPING_7520_14,
             },
             armature=0.01,
         ),
@@ -437,12 +456,12 @@ UNITREE_G1_29DOF_CFG = UnitreeArticulationCfg(
             effort_limit_sim=139,
             velocity_limit_sim=20.0,
             stiffness={
-                ".*_hip_roll_.*": 100.0,
-                ".*_knee_.*": 150.0,
+                ".*_hip_roll_.*": STIFFNESS_7520_22,
+                ".*_knee_.*": STIFFNESS_7520_22,
             },
             damping={
-                ".*_hip_roll_.*": 2.0,
-                ".*_knee_.*": 4.0,
+                ".*_hip_roll_.*": DAMPING_7520_22,
+                ".*_knee_.*": DAMPING_7520_22,
             },
             armature=0.01,
         ),
@@ -457,13 +476,19 @@ UNITREE_G1_29DOF_CFG = UnitreeArticulationCfg(
             ],
             effort_limit_sim=25,
             velocity_limit_sim=37,
-            stiffness=40.0,
+            stiffness={
+                ".*_shoulder_.*": STIFFNESS_5020,
+                ".*_elbow_.*": STIFFNESS_5020,
+                ".*_wrist_roll.*": STIFFNESS_5020,
+                ".*_ankle_.*": 2.0 * STIFFNESS_5020,
+                "waist_.*_joint": 2.0 * STIFFNESS_5020,
+            },
             damping={
-                ".*_shoulder_.*": 10.0,
-                ".*_elbow_.*": 10.0,
-                ".*_wrist_roll.*": 10.0,
-                ".*_ankle_.*": 2.0,
-                "waist_.*_joint": 5.0,
+                ".*_shoulder_.*": DAMPING_5020,
+                ".*_elbow_.*": DAMPING_5020,
+                ".*_wrist_roll.*": DAMPING_5020,
+                ".*_ankle_.*": 2.0 * DAMPING_5020,
+                "waist_.*_joint": 2.0 * DAMPING_5020,
             },
             armature=0.01,
         ),
@@ -471,8 +496,8 @@ UNITREE_G1_29DOF_CFG = UnitreeArticulationCfg(
             joint_names_expr=[".*_wrist_pitch.*", ".*_wrist_yaw.*"],
             effort_limit_sim=5,
             velocity_limit_sim=22,
-            stiffness=40.0,
-            damping=10.0,
+            stiffness=STIFFNESS_4010,
+            damping=DAMPING_4010,
             armature=0.01,
         ),
     },
